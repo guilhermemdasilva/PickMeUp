@@ -10,6 +10,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -95,6 +96,7 @@ public class HomeActivity extends AppCompatActivity {
                     location.getLatitude(), location.getLongitude()
             );
             onClickWhatsApp(message);
+            sendSMS(message, "+5592000000000");
             Toast.makeText(HomeActivity.this, message,
                     Toast.LENGTH_LONG).show();
         } else {
@@ -107,6 +109,7 @@ public class HomeActivity extends AppCompatActivity {
                         location.getLatitude(), location.getLongitude()
                 );
                 onClickWhatsApp(message);
+                sendSMS(message, "+5592000000000");
                 Toast.makeText(HomeActivity.this, message,
                         Toast.LENGTH_LONG).show();
             } else {
@@ -189,6 +192,12 @@ public class HomeActivity extends AppCompatActivity {
             Log.d(TAG, "Provider enabled by the user. GPS turned on");
         }
 
+    }
+
+    public void sendSMS(String message, String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:" + phoneNumber));
+        intent.putExtra("sms_body", message);
+        startActivity(intent);
     }
 
     @Override
