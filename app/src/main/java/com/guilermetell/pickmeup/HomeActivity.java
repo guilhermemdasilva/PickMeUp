@@ -92,7 +92,7 @@ public class HomeActivity extends AppCompatActivity {
             String message = String.format(
 //                    "https://www.google.com/maps/@%1$s,%2$s",
                     "http://maps.google.com/maps?daddr=%1$s,%2$s",
-                    location.getLongitude(), location.getLatitude()
+                    location.getLatitude(), location.getLongitude()
             );
             onClickWhatsApp(message);
             Toast.makeText(HomeActivity.this, message,
@@ -104,7 +104,7 @@ public class HomeActivity extends AppCompatActivity {
                 String message = String.format(
                         //"https://www.google.com/maps/@%1$s,%2$s",
                         "http://maps.google.com/maps?daddr=%1$s,%2$s",
-                        location.getLongitude(), location.getLatitude()
+                        location.getLatitude(), location.getLongitude()
                 );
                 onClickWhatsApp(message);
                 Toast.makeText(HomeActivity.this, message,
