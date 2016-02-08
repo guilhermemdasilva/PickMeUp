@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +33,8 @@ public class HomeActivity extends AppCompatActivity {
     private static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 1; // in Meters
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000; // in Milliseconds
     private static final String TAG = HomeActivity.class.getSimpleName();
+    private static final String SELECTED_CONTACT_NUMBER = "SELECTED_CONTACT_NUMBER";
+    private static final String UNKNOWN_CONTACT_NUMBER = "UNKNOWN_CONTACT_NUMBER";
 
     protected LocationManager locationManager;
     protected LocationListener locationListener;
@@ -87,36 +92,31 @@ public class HomeActivity extends AppCompatActivity {
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         String cityName = null;
+        String SelectedContactNumber = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(SELECTED_CONTACT_NUMBER, UNKNOWN_CONTACT_NUMBER);
 
         if (location != null) {
             cityName = getCityNameFromCoordinates(location);
-            String message = String.format(
-//                    "https://www.google.com/maps/@%1$s,%2$s",
-                    "http://maps.google.com/maps?daddr=%1$s,%2$s",
-                    location.getLatitude(), location.getLongitude()
-            );
-            onClickWhatsApp(message);
-            sendSMS(message, "+5592000000000");
-            Toast.makeText(HomeActivity.this, message,
-                    Toast.LENGTH_LONG).show();
         } else {
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (location != null) {
-                cityName = getCityNameFromCoordinates(location);
-                String message = String.format(
-                        //"https://www.google.com/maps/@%1$s,%2$s",
-                        "http://maps.google.com/maps?daddr=%1$s,%2$s",
-                        location.getLatitude(), location.getLongitude()
-                );
-                onClickWhatsApp(message);
-                sendSMS(message, "+5592000000000");
-                Toast.makeText(HomeActivity.this, message,
-                        Toast.LENGTH_LONG).show();
-            } else {
+            if (location == null) {
                 Toast.makeText(HomeActivity.this, "location == null",
                         Toast.LENGTH_LONG).show();
+                return;
             }
+            cityName = getCityNameFromCoordinates(location);
         }
+        String message = String.format(
+                //"https://www.google.com/maps/@%1$s,%2$s",
+                "http://maps.google.com/maps?daddr=%1$s,%2$s",
+                location.getLatitude(), location.getLongitude()
+        );
+        if(SelectedContactNumber.equals(UNKNOWN_CONTACT_NUMBER)) {
+            onClickWhatsApp(message);
+        } else {
+            sendSMS(message, SelectedContactNumber);
+        }
+        Toast.makeText(HomeActivity.this, message,
+                Toast.LENGTH_LONG).show();
 
     }
 
@@ -200,6 +200,39 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void pickContact() {
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+        startActivityForResult(pickContactIntent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data != null) {
+            Uri uri = data.getData();
+
+            if (uri != null) {
+                Cursor c = null;
+                try {
+                    c = getContentResolver().query(uri, new String[]{
+                                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                    ContactsContract.CommonDataKinds.Phone.TYPE },
+                            null, null, null);
+
+                    if (c != null && c.moveToFirst()) {
+                        String SelectedContactNumber = c.getString(0);
+                        int SelectedContactType = c.getInt(1);
+                        PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit().putString(SELECTED_CONTACT_NUMBER, SelectedContactNumber).commit();
+                    }
+                } finally {
+                    if (c != null) {
+                        c.close();
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -215,7 +248,8 @@ public class HomeActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_contact) {
+            pickContact();
             return true;
         }
 
