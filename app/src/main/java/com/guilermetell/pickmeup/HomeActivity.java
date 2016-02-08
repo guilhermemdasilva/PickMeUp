@@ -22,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -35,11 +37,14 @@ public class HomeActivity extends AppCompatActivity {
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String SELECTED_CONTACT_NUMBER = "SELECTED_CONTACT_NUMBER";
     private static final String UNKNOWN_CONTACT_NUMBER = "UNKNOWN_CONTACT_NUMBER";
+    private static final String MSG_TYPE_SWITCH = "MSG_TYPE_SWITCH";
 
     protected LocationManager locationManager;
     protected LocationListener locationListener;
     protected Button PickMeBtn;
+    protected Switch MsgTypeSwitch;
 
+    private static boolean isWhatsApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         PickMeBtn = (Button) findViewById(R.id.pick_me);
+        MsgTypeSwitch = (Switch) findViewById(R.id.msg_type_switch);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         //http://stackoverflow.com/questions/32615013/is-it-available-to-set-checkselfpermission-on-minimum-sdk-23
@@ -68,6 +74,16 @@ public class HomeActivity extends AppCompatActivity {
                 locationListener
         );
 
+        isWhatsApp = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean(MSG_TYPE_SWITCH, false);
+        MsgTypeSwitch.setChecked(isWhatsApp);
+
+        MsgTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit().putBoolean(MSG_TYPE_SWITCH, isChecked).commit();
+                isWhatsApp = isChecked;
+            }
+        });
 
         PickMeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +115,7 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) {
-                Toast.makeText(HomeActivity.this, "location == null",
+                Toast.makeText(HomeActivity.this, "location is unknown",
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -110,10 +126,14 @@ public class HomeActivity extends AppCompatActivity {
                 "http://maps.google.com/maps?daddr=%1$s,%2$s",
                 location.getLatitude(), location.getLongitude()
         );
-        if(SelectedContactNumber.equals(UNKNOWN_CONTACT_NUMBER)) {
+        if(isWhatsApp) {
             onClickWhatsApp(message);
         } else {
-            sendSMS(message, SelectedContactNumber);
+            if(SelectedContactNumber.equals(UNKNOWN_CONTACT_NUMBER)) {
+                pickContact();
+            } else {
+                sendSMS(message, SelectedContactNumber);
+            }
         }
         Toast.makeText(HomeActivity.this, message,
                 Toast.LENGTH_LONG).show();

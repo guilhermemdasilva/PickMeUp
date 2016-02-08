@@ -4,4 +4,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_contact">Choose Contact</string>
     <string name="pick_me">Pick Me Up!</string>
+    <string name="sms">SMS</string>
+    <string name="whatsapp">Whatsapp</string>
 </resources>
