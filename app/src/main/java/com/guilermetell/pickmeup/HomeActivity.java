@@ -74,6 +74,8 @@ public class HomeActivity extends AppCompatActivity {
                 locationListener
         );
 
+        enableGPS();
+
         isWhatsApp = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean(MSG_TYPE_SWITCH, false);
         MsgTypeSwitch.setChecked(isWhatsApp);
 
@@ -115,8 +117,7 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) {
-                Toast.makeText(HomeActivity.this, "location is unknown",
-                        Toast.LENGTH_LONG).show();
+                enableGPS();
                 return;
             }
             cityName = getCityNameFromCoordinates(location);
@@ -138,6 +139,16 @@ public class HomeActivity extends AppCompatActivity {
         Toast.makeText(HomeActivity.this, message,
                 Toast.LENGTH_LONG).show();
 
+    }
+
+    public void enableGPS() {
+        LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(HomeActivity.this, "Please, turn on you Location Settings",
+                    Toast.LENGTH_LONG).show();
+            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        }
     }
 
     public String getCityNameFromCoordinates(Location location) {
