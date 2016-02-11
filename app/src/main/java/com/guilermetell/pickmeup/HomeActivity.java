@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
@@ -25,8 +26,14 @@ import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String[] INITIAL_PERMS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    };
+
     private static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 1; // in Meters
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000; // in Milliseconds
+    private static final int INITIAL_REQUEST = 2110;
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String SELECTED_CONTACT_NUMBER = "SELECTED_CONTACT_NUMBER";
     private static final String UNKNOWN_CONTACT_NUMBER = "UNKNOWN_CONTACT_NUMBER";
@@ -47,16 +54,11 @@ public class HomeActivity extends AppCompatActivity {
         PickMeBtn = (Button) findViewById(R.id.pick_me);
         MsgTypeSwitch = (Switch) findViewById(R.id.msg_type_switch);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+                return;
+            }
         }
         locationListener = new MyLocationListener();
         locationManager.requestLocationUpdates(
@@ -87,17 +89,18 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     protected void showCurrentLocation() {
 
-        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+                return;
+            }
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         String SelectedContactNumber = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(SELECTED_CONTACT_NUMBER, UNKNOWN_CONTACT_NUMBER);
