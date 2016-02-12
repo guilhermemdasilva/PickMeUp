@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vem Me Buscar!</string>
+
+    <string name="action_contact">Escolha o Contato</string>
+    <string name="pick_me">Vem Me Buscar!</string>
+    <string name="sms">SMS</string>
+    <string name="whatsapp">Whatsapp</string>
+    <string name="message">Venha me buscar em:</string>
+</resources>

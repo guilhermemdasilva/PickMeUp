@@ -38,6 +38,7 @@ public class HomeActivity extends AppCompatActivity {
     private static final String SELECTED_CONTACT_NUMBER = "SELECTED_CONTACT_NUMBER";
     private static final String UNKNOWN_CONTACT_NUMBER = "UNKNOWN_CONTACT_NUMBER";
     private static final String MSG_TYPE_SWITCH = "MSG_TYPE_SWITCH";
+    private String MSG_INTRO;
 
     protected LocationManager locationManager;
     protected LocationListener locationListener;
@@ -112,9 +113,10 @@ public class HomeActivity extends AppCompatActivity {
                 return;
             }
         }
+        MSG_INTRO = getBaseContext().getString(R.string.message);
         String message = String.format(
-                "http://maps.google.com/maps?daddr=%1$s,%2$s",
-                location.getLatitude(), location.getLongitude()
+                "%1$s http://maps.google.com/maps?daddr=%2$s,%3$s",
+                MSG_INTRO, location.getLatitude(), location.getLongitude()
         );
         if(isWhatsApp) {
             onClickWhatsApp(message);

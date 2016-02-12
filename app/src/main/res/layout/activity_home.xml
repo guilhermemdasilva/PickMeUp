@@ -35,9 +35,8 @@
             android:background="@drawable/round_button"
             android:text="@string/pick_me"
             android:textAllCaps="true"
-            android:textSize="45sp"
-            android:textColor="@color/letterorange"
-            android:paddingTop="20dp"/>
+            android:textSize="40sp"
+            android:textColor="@color/letterorange"/>
     </LinearLayout>
 
 </RelativeLayout>
